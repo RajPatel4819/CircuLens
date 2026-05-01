@@ -187,10 +187,10 @@ def send_notifications(new_circular_ids: list[int]) -> dict:
 
             if sent:
                 stats['emails_sent'] += 1
-                notif_ids_str = ','.join(str(i) for i in data['notif_ids'])
+                placeholders = ','.join(['%s'] * len(data['notif_ids']))
                 cursor.execute(
-                    f"UPDATE notifications SET is_sent = 1, sent_at = %s WHERE id IN ({notif_ids_str})",
-                    (datetime.now(),)
+                    f"UPDATE notifications SET is_sent = 1, sent_at = %s WHERE id IN ({placeholders})",
+                    (datetime.now(), *data['notif_ids'])
                 )
             else:
                 stats['emails_failed'] += 1

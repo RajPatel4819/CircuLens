@@ -25,10 +25,6 @@ try {
     $prefs->execute([$user['id']]);
     $preferences = $prefs->fetch();
 
-    $unreadCount = (int)$pdo->prepare('SELECT COUNT(*) FROM notifications WHERE user_id = ? AND is_read = 0')
-        ->execute([$user['id']]) ? $pdo->prepare('SELECT COUNT(*) FROM notifications WHERE user_id = ? AND is_read = 0') : null;
-
-    // Simpler approach
     $unreadStmt = $pdo->prepare('SELECT COUNT(*) FROM notifications WHERE user_id = ? AND is_read = 0');
     $unreadStmt->execute([$user['id']]);
     $unreadCount = (int)$unreadStmt->fetchColumn();

@@ -5,13 +5,6 @@ $pageTitle = 'My Profile';
 
 $user = getCurrentUser();
 
-$degrees = ['BE', 'BTech', 'ME', 'MTech', 'MBA', 'MCA', 'Diploma', 'PhD'];
-$departments = [
-    'Computer Engineering', 'Information Technology', 'Electronics & Communication',
-    'Mechanical Engineering', 'Civil Engineering', 'Electrical Engineering',
-    'Chemical Engineering', 'Biomedical Engineering', 'Others',
-];
-
 try {
     $stmt = db()->prepare('SELECT * FROM users WHERE id = ? LIMIT 1');
     $stmt->execute([$user['id']]);

@@ -10,6 +10,7 @@ import hashlib
 import logging
 import requests
 from datetime import datetime
+from typing import Optional
 from urllib.parse import urljoin, urlparse
 
 from bs4 import BeautifulSoup
@@ -79,7 +80,7 @@ def circular_exists(cursor, content_hash: str) -> bool:
     return cursor.fetchone() is not None
 
 
-def fetch_page(url: str) -> BeautifulSoup | None:
+def fetch_page(url: str) -> Optional[BeautifulSoup]:
     """Fetch and parse a web page."""
     try:
         resp = requests.get(url, headers=HEADERS, timeout=REQUEST_TIMEOUT)
@@ -91,7 +92,7 @@ def fetch_page(url: str) -> BeautifulSoup | None:
         return None
 
 
-def download_pdf(pdf_url: str, filename: str) -> str | None:
+def download_pdf(pdf_url: str, filename: str) -> Optional[str]:
     """Download a PDF file and save it to the uploads directory."""
     try:
         os.makedirs(UPLOAD_DIR, exist_ok=True)
@@ -179,7 +180,7 @@ def parse_circulars(soup: BeautifulSoup, base_url: str) -> list[dict]:
     return circulars
 
 
-def save_circular(cursor, conn, circular: dict) -> int | None:
+def save_circular(cursor, conn, circular: dict) -> Optional[int]:
     """Save a circular to the database. Returns new circular ID or None if duplicate."""
     title       = circular['title']
     description = circular.get('description', '')
