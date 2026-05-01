@@ -10,6 +10,9 @@ if (isAdminLoggedIn()) {
 $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (!verifyCsrfToken($_POST['csrf_token'] ?? '')) {
+        $error = 'Invalid request. Please try again.';
+    } else {
     require_once __DIR__ . '/../config/database.php';
 
     $username = trim($_POST['username'] ?? '');
@@ -36,6 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = 'Database error. Please try again.';
         }
     }
+    } // end csrf check
 }
 ?>
 <!DOCTYPE html>
@@ -64,6 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <?php endif; ?>
 
             <form method="POST" class="space-y-4">
+                <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Username</label>
                     <input type="text" name="username" required autocomplete="username"

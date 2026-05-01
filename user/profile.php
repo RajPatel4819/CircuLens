@@ -19,6 +19,9 @@ $error   = '';
 $success = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (!verifyCsrfToken($_POST['csrf_token'] ?? '')) {
+        $error = 'Invalid request. Please try again.';
+    } else {
     $action = $_POST['action'] ?? '';
 
     if ($action === 'update_name') {
@@ -61,6 +64,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
     }
+    } // end csrf check
 }
 
 include __DIR__ . '/../includes/user_header.php';
@@ -92,6 +96,7 @@ include __DIR__ . '/../includes/user_header.php';
 
         <form method="POST" class="space-y-4">
             <input type="hidden" name="action" value="update_name">
+            <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
                 <input type="text" name="name" required maxlength="100"
@@ -115,6 +120,7 @@ include __DIR__ . '/../includes/user_header.php';
         <h2 class="text-lg font-semibold text-gray-900 mb-4">Change Password</h2>
         <form method="POST" class="space-y-4">
             <input type="hidden" name="action" value="change_password">
+            <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Current Password</label>
                 <input type="password" name="current_password" required autocomplete="current-password"

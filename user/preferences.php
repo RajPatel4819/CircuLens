@@ -30,6 +30,11 @@ if ($prefs && !empty($prefs['circular_types'])) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (!verifyCsrfToken($_POST['csrf_token'] ?? '')) {
+        setFlash('error', 'Invalid request. Please try again.');
+        header('Location: ' . APP_URL . '/user/preferences.php');
+        exit;
+    }
     $degree     = trim($_POST['degree']     ?? '');
     $dept       = trim($_POST['department'] ?? '');
     $semester   = trim($_POST['semester']   ?? '');
