@@ -1,0 +1,47 @@
+# Dependencies
+/vendor/
+/node_modules/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+scraper/venv/
+scraper/.env
+scraper/*.log
+scraper/.scraper.lock
+
+# Uploads (keep directory, ignore files)
+assets/uploads/*
+!assets/uploads/.gitkeep
+
+# Environment / secrets
+.env
+*.env
+config/secrets.php
+
+# Logs
+*.log
+/logs/
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# PHP
+*.cache
+.php-cs-fixer.cache
