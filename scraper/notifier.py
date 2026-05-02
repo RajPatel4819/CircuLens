@@ -209,19 +209,36 @@ def send_notifications(new_circular_ids: list[int]) -> dict:
 
 
 if __name__ == '__main__':
+    import argparse
+    import sys
+    
     logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] %(message)s')
-    # Test: send notifications for all unsent
+    
+    parser = argparse.ArgumentParser(description='CircuLens Notification Dispatcher')
+    parser.add_argument('--id', type=int, help='Specific circular ID to notify for')
+    parser.add_argument('--all', action='store_true', help='Notify for all pending notifications')
+    
+    args = parser.parse_args()
+    
     try:
-        conn   = get_db_connection()
-        cursor = conn.cursor(dictionary=True)
-        cursor.execute('SELECT DISTINCT circular_id FROM notifications WHERE is_sent = 0 LIMIT 20')
-        ids = [row['circular_id'] for row in cursor.fetchall()]
-        cursor.close()
-        conn.close()
+        ids = []
+        if args.id:
+            ids = [args.id]
+        elif args.all:
+            conn   = get_db_connection()
+            cursor = conn.cursor(dictionary=True)
+            cursor.execute('SELECT DISTINCT circular_id FROM notifications WHERE is_sent = 0 LIMIT 100')
+            ids = [row['circular_id'] for row in cursor.fetchall()]
+            cursor.close()
+            conn.close()
+        
         if ids:
+            print(f"Starting notifications for circular IDs: {ids}")
             stats = send_notifications(ids)
-            print(f"Stats: {stats}")
+            print(f"Finished. Stats: {stats}")
         else:
-            print("No pending notifications.")
+            print("No pending circulars or ID specified.")
+            
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"Critical Error: {e}")
+        sys.exit(1)

@@ -74,6 +74,7 @@ include __DIR__ . '/../includes/user_header.php';
     <?php endif; ?>
 
     <form method="POST" class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 space-y-6">
+        <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
         <!-- Academic Info -->
         <div>
             <h2 class="text-base font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-100">Academic Information</h2>

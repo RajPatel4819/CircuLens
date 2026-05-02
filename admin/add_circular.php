@@ -60,7 +60,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                      VALUES (?, ?, ?, ?, "admin", ?, ?, 1)'
                 );
                 $stmt->execute([$title, $description, $pdfPath, $circType, $sourceUrl ?: null, $hash]);
-                setFlash('success', 'Circular added successfully.');
+                
+                $newId = db()->lastInsertId();
+                
+                // Trigger email notifications in background
+                $pythonPath = 'python'; // or full path like 'C:/Python39/python.exe'
+                $scriptPath = realpath(__DIR__ . '/../scraper/notifier.py');
+                if ($scriptPath) {
+                    // Use start /B on Windows to run in background without blocking
+                    $cmd = "start /B $pythonPath \"$scriptPath\" --id $newId > NUL 2>&1";
+                    pclose(popen($cmd, "r"));
+                }
+
+                setFlash('success', 'Circular added successfully. Notifications are being sent.');
                 header('Location: ' . APP_URL . '/admin/circulars.php');
                 exit;
             } catch (Exception $e) {
