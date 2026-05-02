@@ -9,7 +9,7 @@ define('SESSION_LIFETIME', 3600);
 define('DB_HOST', 'localhost');
 define('DB_NAME', 'circulens');
 define('DB_USER', 'root');
-define('DB_PASS', '');
+define('DB_PASS', 'r6323@xyz#');
 
 define('MAIL_HOST', 'smtp.gmail.com');
 define('MAIL_PORT', 587);
