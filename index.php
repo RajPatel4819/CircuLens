@@ -133,58 +133,102 @@ include __DIR__ . '/includes/header.php';
                 </div>
             <?php endif; ?>
 
-            <!-- Year/Month Filters Only -->
-            <div class="bg-white p-5 rounded border border-gray-200 shadow-sm mb-8">
-                <form method="GET" class="flex flex-col md:flex-row gap-4 items-center">
-                    <select name="year" class="w-full md:w-1/3 px-3 py-2.5 border border-gray-300 rounded text-sm text-gtured font-medium outline-none focus:border-gtublue">
-                        <option value="">-- Select Year --</option>
-                        <?php foreach ($years as $yr): ?>
-                            <option value="<?php echo $yr; ?>" <?php echo $selYear == $yr ? 'selected' : ''; ?>>
-                                <?php echo $yr; ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                    <select name="month" class="w-full md:w-1/3 px-3 py-2.5 border border-gray-300 rounded text-sm text-gtured font-medium outline-none focus:border-gtublue">
-                        <option value="">-- Select Month --</option>
-                        <?php foreach ($months as $num => $name): ?>
-                            <option value="<?php echo $num; ?>" <?php echo $selMonth == $num ? 'selected' : ''; ?>>
-                                <?php echo $name; ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                    <button type="submit" class="w-full md:w-1/3 bg-gtured text-white px-8 py-2.5 rounded font-bold hover:bg-red-700 transition-colors shadow-sm">
-                        FILTER
-                    </button>
-                </form>
+            <?php $tab = filter_input(INPUT_GET, 'tab', FILTER_SANITIZE_SPECIAL_CHARS) ?? 'circular'; ?>
+
+            <!-- GTU Style Tabs -->
+            <div class="flex border-2 border-gtured rounded overflow-hidden max-w-2xl mx-auto mb-8 shadow-sm">
+                <a href="?tab=circular" class="flex-1 text-center py-3 text-sm font-bold transition-colors <?php echo $tab === 'circular' ? 'bg-gtured text-white' : 'text-gtured bg-white hover:bg-red-50'; ?>">
+                    Circular
+                </a>
+                <a href="?tab=important" class="flex-1 text-center py-3 text-sm font-bold transition-colors <?php echo $tab === 'important' ? 'bg-gtured text-white' : 'text-gtured bg-white hover:bg-red-50'; ?>">
+                    Important Circular
+                </a>
             </div>
 
-            <!-- Clean List (GTU Style) -->
-            <div class="bg-white rounded border border-gray-200 shadow-sm overflow-hidden">
-                <div class="divide-y divide-gray-100">
-                    <?php if (empty($circulars)): ?>
-                        <div class="p-20 text-center text-gray-400 italic">No matching circulars found.</div>
-                    <?php else: ?>
-                        <?php foreach ($circulars as $c): ?>
-                            <div class="p-5 hover:bg-gray-50 transition-colors border-l-4 border-transparent hover:border-gtured">
-                                <a href="<?php echo !empty($c['pdf_path']) ? htmlspecialchars(UPLOAD_URL . basename($c['pdf_path'])) : '#'; ?>" 
-                                   target="_blank" rel="noopener"
-                                   class="text-[#0056b3] hover:underline font-normal text-[15px] md:text-base block mb-1 leading-normal">
-                                    <?php echo htmlspecialchars($c['description'] ?: $c['title']); ?>
-                                </a>
-                                <div class="text-[13px] text-gray-500">
-                                    <?php echo date('d-M-Y', strtotime($c['created_at'])); ?>
-                                </div>
-                            </div>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
+            <?php if ($tab !== 'important'): ?>
+                <!-- Year/Month Filters (Auto-submit) - Only for regular circulars -->
+                <div class="bg-white p-5 rounded border border-gray-200 shadow-sm mb-8">
+                    <form method="GET" class="flex flex-col md:flex-row gap-4 items-center">
+                        <input type="hidden" name="tab" value="<?php echo htmlspecialchars($tab); ?>">
+                        <select name="year" onchange="this.form.submit()" class="w-full md:w-1/2 px-3 py-2.5 border border-gray-300 rounded text-sm text-gtured font-medium outline-none focus:border-gtublue">
+                            <option value="">-- Select Year --</option>
+                            <?php foreach ($years as $yr): ?>
+                                <option value="<?php echo $yr; ?>" <?php echo $selYear == $yr ? 'selected' : ''; ?>>
+                                    <?php echo $yr; ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                        <select name="month" onchange="this.form.submit()" class="w-full md:w-1/2 px-3 py-2.5 border border-gray-300 rounded text-sm text-gtured font-medium outline-none focus:border-gtublue">
+                            <option value="">-- Select Month --</option>
+                            <?php foreach ($months as $num => $name): ?>
+                                <option value="<?php echo $num; ?>" <?php echo $selMonth == $num ? 'selected' : ''; ?>>
+                                    <?php echo $name; ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </form>
                 </div>
-            </div>
+            <?php endif; ?>
+
+            <?php if ($tab === 'important'): ?>
+                <!-- Exam Tables (Important Section) -->
+                <div class="space-y-6">
+                    <?php 
+                    $exams = [
+                        ['name' => 'Summer Exam 2026', 'links' => ['Theory Exam', 'Practical Exam', 'Exam Center']],
+                        ['name' => 'Winter Exam 2025', 'links' => ['Theory Exam', 'Practical Exam', 'Exam Center']],
+                        ['name' => 'Summer Exam 2025', 'links' => ['Theory Exam', 'Practical Exam', 'Exam Center']],
+                        ['name' => 'Winter Exam 2024', 'links' => ['Theory Exam', 'Practical Exam', 'Exam Center']],
+                        ['name' => 'Summer Exam 2024', 'links' => ['Theory Exam', 'Practical Exam', 'Exam Center']],
+                    ];
+                    foreach ($exams as $e): 
+                    ?>
+                    <div class="bg-white p-6 rounded border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+                        <div class="flex flex-col md:flex-row border border-gray-300 rounded overflow-hidden text-[13px] md:text-sm">
+                            <div class="md:w-1/4 p-4 bg-gray-50 border-b md:border-b-0 md:border-r border-gray-300 font-bold text-gray-700">
+                                <?php echo $e['name']; ?> :
+                            </div>
+                            <div class="flex-1 flex flex-col sm:flex-row divide-y sm:divide-y-0 sm:divide-x divide-gray-300">
+                                <?php foreach ($e['links'] as $link): ?>
+                                    <a href="#" class="flex-1 p-4 text-center text-blue-700 font-semibold hover:bg-blue-50 transition-colors">
+                                        <?php echo $link; ?>
+                                    </a>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+                    </div>
+                    <?php endforeach; ?>
+                </div>
+            <?php else: ?>
+                <!-- Clean List (GTU Style) -->
+                <div class="bg-white rounded border border-gray-200 shadow-sm overflow-hidden">
+                    <div class="divide-y divide-gray-100">
+                        <?php if (empty($circulars)): ?>
+                            <div class="p-20 text-center text-gray-400 italic">No matching circulars found.</div>
+                        <?php else: ?>
+                            <?php foreach ($circulars as $c): ?>
+                                <div class="p-5 hover:bg-gray-50 transition-colors border-l-4 border-transparent hover:border-gtured">
+                                    <a href="<?php echo !empty($c['pdf_path']) ? htmlspecialchars(UPLOAD_URL . basename($c['pdf_path'])) : '#'; ?>" 
+                                       target="_blank" rel="noopener"
+                                       class="text-[#0056b3] hover:underline font-normal text-[15px] md:text-base block mb-1 leading-normal">
+                                        <?php echo htmlspecialchars($c['description'] ?: $c['title']); ?>
+                                    </a>
+                                    <div class="text-[13px] text-gray-500">
+                                        <?php echo date('d-M-Y', strtotime($c['created_at'])); ?>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            <?php endif; ?>
 
             <!-- Pagination -->
             <?php if ($totalPages > 1): ?>
                 <div class="mt-10 flex justify-center gap-2">
                     <?php 
                     $queryStr = http_build_query([
+                        'tab'    => $tab,
                         'year'   => $selYear,
                         'month'  => $selMonth,
                         'search' => $search
