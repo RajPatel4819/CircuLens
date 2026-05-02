@@ -96,16 +96,10 @@ include __DIR__ . '/../includes/admin_header.php';
 <!-- Filters -->
 <form method="GET" class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-6 flex flex-wrap gap-3">
     <input type="text" name="search" value="<?php echo htmlspecialchars($search); ?>"
-           placeholder="Search title or description..."
+           placeholder="Search by circular text..."
            class="flex-1 min-w-48 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
-    <select name="type" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none text-sm">
-        <option value="">All Types</option>
-        <?php foreach (array_keys($typeBadges) as $t): ?>
-            <option value="<?php echo $t; ?>" <?php echo $type === $t ? 'selected' : ''; ?>><?php echo ucfirst($t); ?></option>
-        <?php endforeach; ?>
-    </select>
-    <button type="submit" class="bg-blue-800 text-white px-5 py-2 rounded-lg text-sm font-medium">Filter</button>
-    <a href="<?php echo APP_URL; ?>/admin/circulars.php" class="text-gray-500 hover:text-gray-700 px-3 py-2 text-sm">Reset</a>
+    <button type="submit" class="bg-blue-800 text-white px-8 py-2 rounded-lg text-sm font-bold shadow-sm hover:bg-blue-900 transition-colors">Filter</button>
+    <a href="<?php echo APP_URL; ?>/admin/circulars.php" class="text-gray-500 hover:text-gray-700 px-3 py-2 text-sm font-medium">Reset</a>
 </form>
 
 <?php if (!$dbOk): ?>
@@ -117,54 +111,52 @@ include __DIR__ . '/../includes/admin_header.php';
         <table class="w-full text-sm">
             <thead class="bg-gray-50 border-b border-gray-100">
                 <tr>
-                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Title</th>
-                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Type</th>
-                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Source</th>
-                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
-                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Date</th>
-                    <th class="px-4 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
+                    <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Circular Text / Description</th>
+                    <th class="px-4 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Source</th>
+                    <th class="px-4 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Status</th>
+                    <th class="px-4 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Date</th>
+                    <th class="px-4 py-4 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Actions</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-50">
                 <?php if (empty($circulars)): ?>
-                    <tr><td colspan="6" class="px-6 py-10 text-center text-gray-400">No circulars found.</td></tr>
+                    <tr><td colspan="5" class="px-6 py-12 text-center text-gray-400 italic">No circulars found matching your criteria.</td></tr>
                 <?php else: ?>
                     <?php foreach ($circulars as $c): ?>
-                        <tr class="hover:bg-gray-50">
-                            <td class="px-6 py-4">
-                                <div class="font-medium text-gray-900 max-w-xs truncate"><?php echo htmlspecialchars($c['title']); ?></div>
+                        <tr class="hover:bg-gray-50 transition-colors">
+                            <td class="px-6 py-5">
+                                <div class="text-gray-900 text-[14px] leading-relaxed max-w-md">
+                                    <?php echo htmlspecialchars($c['description'] ?: $c['title']); ?>
+                                </div>
                                 <?php if ($c['pdf_path']): ?>
                                     <a href="<?php echo htmlspecialchars(UPLOAD_URL . basename($c['pdf_path'])); ?>"
-                                       class="text-blue-500 hover:underline text-xs mt-0.5 inline-block" target="_blank">📎 PDF</a>
+                                       class="text-blue-600 hover:underline text-xs font-bold mt-2 inline-flex items-center gap-1" target="_blank">
+                                       <span class="text-blue-400">📎</span> VIEW PDF
+                                    </a>
                                 <?php endif; ?>
                             </td>
-                            <td class="px-4 py-4">
-                                <span class="px-2 py-0.5 rounded-full text-xs font-medium <?php echo $typeBadges[$c['circular_type']] ?? 'bg-gray-100 text-gray-800'; ?>">
-                                    <?php echo ucfirst($c['circular_type']); ?>
-                                </span>
-                            </td>
-                            <td class="px-4 py-4 text-gray-500 capitalize"><?php echo htmlspecialchars($c['source']); ?></td>
-                            <td class="px-4 py-4">
-                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium <?php echo $c['is_active'] ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'; ?>">
-                                    <span class="w-1.5 h-1.5 rounded-full <?php echo $c['is_active'] ? 'bg-green-500' : 'bg-red-400'; ?>"></span>
+                            <td class="px-4 py-5 text-gray-500 font-medium capitalize"><?php echo htmlspecialchars($c['source']); ?></td>
+                            <td class="px-4 py-5">
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold <?php echo $c['is_active'] ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'; ?>">
+                                    <span class="w-1.5 h-1.5 rounded-full <?php echo $c['is_active'] ? 'bg-green-500' : 'bg-red-500'; ?>"></span>
                                     <?php echo $c['is_active'] ? 'Active' : 'Inactive'; ?>
                                 </span>
                             </td>
-                            <td class="px-4 py-4 text-gray-500 text-xs"><?php echo date('M d, Y', strtotime($c['created_at'])); ?></td>
-                            <td class="px-4 py-4 text-right">
+                            <td class="px-4 py-5 text-gray-500 text-xs font-medium"><?php echo date('M d, Y', strtotime($c['created_at'])); ?></td>
+                            <td class="px-4 py-5 text-right">
                                 <div class="flex items-center justify-end gap-2">
                                     <form method="POST" class="inline">
                                         <input type="hidden" name="action" value="toggle">
                                         <input type="hidden" name="id" value="<?php echo $c['id']; ?>">
                                         <button type="submit"
-                                                class="text-xs px-3 py-1.5 rounded-lg border font-medium transition-colors <?php echo $c['is_active'] ? 'text-orange-600 border-orange-200 hover:bg-orange-50' : 'text-green-600 border-green-200 hover:bg-green-50'; ?>">
+                                                class="text-[11px] px-3 py-1.5 rounded-lg border font-bold uppercase tracking-wider transition-all <?php echo $c['is_active'] ? 'text-orange-600 border-orange-200 hover:bg-orange-50' : 'text-green-600 border-green-200 hover:bg-green-50'; ?>">
                                             <?php echo $c['is_active'] ? 'Deactivate' : 'Activate'; ?>
                                         </button>
                                     </form>
-                                    <form method="POST" class="inline" onsubmit="return confirm('Delete this circular?')">
+                                    <form method="POST" class="inline" onsubmit="return confirm('Permanently delete this circular?')">
                                         <input type="hidden" name="action" value="delete">
                                         <input type="hidden" name="id" value="<?php echo $c['id']; ?>">
-                                        <button type="submit" class="text-xs px-3 py-1.5 rounded-lg border text-red-600 border-red-200 hover:bg-red-50 font-medium transition-colors">
+                                        <button type="submit" class="text-[11px] px-3 py-1.5 rounded-lg border text-red-600 border-red-200 hover:bg-red-50 font-bold uppercase tracking-wider transition-all">
                                             Delete
                                         </button>
                                     </form>
@@ -178,10 +170,10 @@ include __DIR__ . '/../includes/admin_header.php';
     </div>
 
     <?php if ($totalPages > 1): ?>
-        <div class="px-6 py-4 border-t border-gray-100 flex justify-center gap-2">
+        <div class="px-6 py-5 border-t border-gray-100 flex justify-center gap-2 bg-gray-50/30">
             <?php for ($p = 1; $p <= $totalPages; $p++): ?>
-                <a href="?page=<?php echo $p; ?>&type=<?php echo urlencode($type); ?>&search=<?php echo urlencode($search); ?>"
-                   class="px-3 py-1.5 rounded-lg text-sm <?php echo $p === $page ? 'bg-blue-800 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'; ?>">
+                <a href="?page=<?php echo $p; ?>&search=<?php echo urlencode($search); ?>"
+                   class="w-10 h-10 flex items-center justify-center rounded-xl text-sm font-bold transition-all <?php echo $p === $page ? 'bg-blue-800 text-white shadow-md' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'; ?>">
                     <?php echo $p; ?>
                 </a>
             <?php endfor; ?>

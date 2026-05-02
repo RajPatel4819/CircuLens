@@ -7,13 +7,18 @@ $types = ['academic', 'examination', 'events', 'placement', 'timetable', 'genera
 $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $title       = trim($_POST['title']       ?? '');
     $description = trim($_POST['description'] ?? '');
+    $title       = trim($_POST['title']       ?? '');
     $circType    = $_POST['circular_type']    ?? 'general';
     $sourceUrl   = trim($_POST['source_url']  ?? '');
 
-    if (!$title) {
-        $error = 'Title is required.';
+    // Auto-populate title from description if empty
+    if (!$title && $description) {
+        $title = mb_substr($description, 0, 100) . (mb_strlen($description) > 100 ? '...' : '');
+    }
+
+    if (!$description) {
+        $error = 'Description (Circular Text) is required.';
     } elseif (!in_array($circType, $types)) {
         $error = 'Invalid circular type.';
     } else {
@@ -80,61 +85,41 @@ include __DIR__ . '/../includes/admin_header.php';
         </div>
     <?php endif; ?>
 
-    <form method="POST" enctype="multipart/form-data" class="space-y-5">
+    <form method="POST" enctype="multipart/form-data" class="space-y-6">
         <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-                Title <span class="text-red-500">*</span>
+            <label class="block text-sm font-bold text-gray-700 mb-1">
+                Circular Description / Text <span class="text-red-500">*</span>
             </label>
-            <input type="text" name="title" required maxlength="255"
-                   value="<?php echo htmlspecialchars($_POST['title'] ?? ''); ?>"
-                   class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                   placeholder="e.g. Academic Calendar 2024-25">
+            <textarea name="description" rows="6" required maxlength="5000"
+                      class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm resize-none shadow-sm"
+                      placeholder="Enter the main text of the circular (this will be the clickable link on the portal)..."><?php echo htmlspecialchars($_POST['description'] ?? ''); ?></textarea>
         </div>
 
-        <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
-            <textarea name="description" rows="4" maxlength="5000"
-                      class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm resize-none"
-                      placeholder="Describe the circular content..."><?php echo htmlspecialchars($_POST['description'] ?? ''); ?></textarea>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Upload PDF File</label>
+                <input type="file" name="pdf" accept=".pdf"
+                       class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-blue-50 file:text-blue-700 file:font-medium hover:file:bg-blue-100">
+                <p class="text-[10px] text-gray-400 mt-1 uppercase tracking-wider">MAX: 10MB | PDF ONLY</p>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">External Source URL (Optional)</label>
+                <input type="url" name="source_url" maxlength="500"
+                       value="<?php echo htmlspecialchars($_POST['source_url'] ?? ''); ?>"
+                       class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                       placeholder="https://www.gtu.ac.in/...">
+            </div>
         </div>
 
-        <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-                Circular Type <span class="text-red-500">*</span>
-            </label>
-            <select name="circular_type"
-                    class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
-                <?php foreach ($types as $t): ?>
-                    <option value="<?php echo $t; ?>" <?php echo ($_POST['circular_type'] ?? 'general') === $t ? 'selected' : ''; ?>>
-                        <?php echo ucfirst($t); ?>
-                    </option>
-                <?php endforeach; ?>
-            </select>
-        </div>
-
-        <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Upload PDF (optional)</label>
-            <input type="file" name="pdf" accept=".pdf"
-                   class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-blue-50 file:text-blue-700 file:font-medium hover:file:bg-blue-100">
-            <p class="text-gray-400 text-xs mt-1">Max size: 10 MB. PDF files only.</p>
-        </div>
-
-        <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Source URL (optional)</label>
-            <input type="url" name="source_url" maxlength="500"
-                   value="<?php echo htmlspecialchars($_POST['source_url'] ?? ''); ?>"
-                   class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                   placeholder="https://www.gtu.ac.in/...">
-        </div>
-
-        <div class="flex gap-3 pt-2">
+        <div class="flex gap-4 pt-4">
             <button type="submit"
-                    class="bg-blue-800 hover:bg-blue-700 text-white px-8 py-2.5 rounded-xl font-semibold text-sm transition-colors">
-                Add Circular
+                    class="bg-blue-800 hover:bg-blue-700 text-white px-10 py-3 rounded-xl font-bold text-sm transition-all shadow-md active:scale-95">
+                UPLOAD CIRCULAR
             </button>
             <a href="<?php echo APP_URL; ?>/admin/circulars.php"
-               class="px-6 py-2.5 border border-gray-300 text-gray-700 rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors">
-                Cancel
+               class="px-8 py-3 border border-gray-300 text-gray-600 rounded-xl text-sm font-bold hover:bg-gray-50 transition-colors">
+                CANCEL
             </a>
         </div>
     </form>

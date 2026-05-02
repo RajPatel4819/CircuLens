@@ -120,10 +120,9 @@ $typeBadges = [
             <?php foreach ($recentCirculars as $c): ?>
                 <div class="px-6 py-4 flex items-center justify-between hover:bg-gray-50">
                     <div class="flex items-center gap-3 flex-1 min-w-0">
-                        <span class="px-2 py-0.5 rounded-full text-xs font-medium <?php echo $typeBadges[$c['circular_type']] ?? 'bg-gray-100 text-gray-800'; ?>">
-                            <?php echo ucfirst($c['circular_type']); ?>
+                        <span class="text-gray-800 text-sm font-medium truncate">
+                            <?php echo htmlspecialchars($c['description'] ?: $c['title']); ?>
                         </span>
-                        <span class="text-gray-800 text-sm font-medium truncate"><?php echo htmlspecialchars($c['title']); ?></span>
                     </div>
                     <div class="flex items-center gap-4 ml-4 shrink-0">
                         <span class="text-gray-400 text-xs"><?php echo date('M d, Y', strtotime($c['created_at'])); ?></span>
