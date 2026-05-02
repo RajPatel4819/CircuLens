@@ -9,8 +9,28 @@ $error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $description = trim($_POST['description'] ?? '');
     $title       = trim($_POST['title']       ?? '');
-    $circType    = $_POST['circular_type']    ?? 'general';
     $sourceUrl   = trim($_POST['source_url']  ?? '');
+
+    // Auto-detect circular type from description
+    function detectCircularType($text) {
+        $text = strtolower($text);
+        $keywords = [
+            'academic'    => ['academic', 'enrollment', 'admission', 'syllabus', 'scholarship', 'registration', 'course'],
+            'examination' => ['exam', 'test', 'result', 'theory', 'practical', 'viva', 'hall ticket', 'center', 'internal'],
+            'placement'   => ['placement', 'job', 'recruitment', 'tcs', 'company', 'interview', 'drive', 'hiring'],
+            'timetable'   => ['timetable', 'schedule', 'lecture', 'timing'],
+            'events'      => ['event', 'fest', 'celebration', 'workshop', 'seminar', 'competition', 'day']
+        ];
+        
+        foreach ($keywords as $type => $keys) {
+            foreach ($keys as $key) {
+                if (strpos($text, $key) !== false) return $type;
+            }
+        }
+        return 'general';
+    }
+
+    $circType = detectCircularType($description);
 
     // Auto-populate title from description if empty
     if (!$title && $description) {
