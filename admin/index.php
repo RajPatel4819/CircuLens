@@ -10,7 +10,7 @@ try {
     $activeCirculars = (int)$pdo->query('SELECT COUNT(*) FROM circulars WHERE is_active = 1')->fetchColumn();
     $totalUsers = (int)$pdo->query('SELECT COUNT(*) FROM users')->fetchColumn();
     $totalNotifications = (int)$pdo->query('SELECT COUNT(*) FROM notifications')->fetchColumn();
-    $recentCirculars = $pdo->query('SELECT * FROM circulars ORDER BY created_at DESC LIMIT 5')->fetchAll();
+    $recentCirculars = $pdo->query('SELECT * FROM circulars ORDER BY created_at DESC, id DESC LIMIT 5')->fetchAll();
     $dbOk = true;
 } catch (Exception $e) {
     $totalCirculars = $activeCirculars = $totalUsers = $totalNotifications = 0;

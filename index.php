@@ -44,7 +44,7 @@ try {
 
     $params[':limit']  = $limit;
     $params[':offset'] = $offset;
-    $stmt = $pdo->prepare("SELECT * FROM circulars c WHERE $whereSQL ORDER BY c.created_at DESC LIMIT :limit OFFSET :offset");
+    $stmt = $pdo->prepare("SELECT * FROM circulars c WHERE $whereSQL ORDER BY c.created_at DESC, c.id DESC LIMIT :limit OFFSET :offset");
     foreach ($params as $k => $v) {
         $type_flag = ($k === ':limit' || $k === ':offset') ? PDO::PARAM_INT : PDO::PARAM_STR;
         $stmt->bindValue($k, $v, $type_flag);

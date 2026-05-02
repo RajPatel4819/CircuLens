@@ -65,7 +65,7 @@ try {
 
     $params[':lim'] = $limit;
     $params[':off'] = $offset;
-    $stmt = $pdo->prepare("SELECT * FROM circulars WHERE $whereSQL ORDER BY created_at DESC LIMIT :lim OFFSET :off");
+    $stmt = $pdo->prepare("SELECT * FROM circulars WHERE $whereSQL ORDER BY created_at DESC, id DESC LIMIT :lim OFFSET :off");
     foreach ($params as $k => $v) {
         $stmt->bindValue($k, $v, in_array($k, [':lim', ':off']) ? PDO::PARAM_INT : PDO::PARAM_STR);
     }
@@ -125,14 +125,13 @@ include __DIR__ . '/../includes/admin_header.php';
                     <?php foreach ($circulars as $c): ?>
                         <tr class="hover:bg-gray-50 transition-colors">
                             <td class="px-6 py-5">
-                                <div class="text-gray-900 text-[14px] leading-relaxed max-w-md">
+                                <a href="<?php echo !empty($c['pdf_path']) ? htmlspecialchars(UPLOAD_URL . basename($c['pdf_path'])) : (!empty($c['source_url']) ? htmlspecialchars($c['source_url']) : '#'); ?>" 
+                                   target="_blank" rel="noopener"
+                                   class="text-gray-900 text-[14px] leading-relaxed max-w-md block hover:text-blue-700 hover:underline transition-colors font-medium">
                                     <?php echo htmlspecialchars($c['description'] ?: $c['title']); ?>
-                                </div>
+                                </a>
                                 <?php if ($c['pdf_path']): ?>
-                                    <a href="<?php echo htmlspecialchars(UPLOAD_URL . basename($c['pdf_path'])); ?>"
-                                       class="text-blue-600 hover:underline text-xs font-bold mt-2 inline-flex items-center gap-1" target="_blank">
-                                       <span class="text-blue-400">📎</span> VIEW PDF
-                                    </a>
+                                    <span class="text-[10px] text-gray-400 font-bold mt-1 block uppercase tracking-tighter">📎 PDF ATTACHED</span>
                                 <?php endif; ?>
                             </td>
                             <td class="px-4 py-5 text-gray-500 font-medium capitalize"><?php echo htmlspecialchars($c['source']); ?></td>
