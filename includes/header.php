@@ -15,37 +15,59 @@ $flash = getFlash();
             theme: {
                 extend: {
                     colors: {
-                        primary: { 600: '#2563eb', 700: '#1d4ed8', 800: '#1e40af' },
-                        accent:  { 500: '#f97316', 600: '#ea580c' }
+                        gtublue: '#1D2951',
+                        gtured: '#D32F2F',
                     }
                 }
             }
         }
     </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+    </style>
 </head>
-<body class="bg-gray-50 min-h-screen flex flex-col">
-<nav class="bg-blue-800 shadow-lg">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between items-center h-16">
-            <a href="<?php echo APP_URL; ?>" class="flex items-center space-x-1">
-                <span class="text-orange-400 font-bold text-2xl">Circu</span><span class="text-white font-bold text-2xl">Lens</span>
-            </a>
-            <div class="flex items-center space-x-4">
-                <a href="<?php echo APP_URL; ?>" class="text-blue-100 hover:text-white text-sm font-medium">Home</a>
-                <?php if (isUserLoggedIn()): ?>
-                    <a href="<?php echo APP_URL; ?>/user/dashboard.php" class="text-blue-100 hover:text-white text-sm font-medium">Dashboard</a>
-                    <a href="<?php echo APP_URL; ?>/user/logout.php" class="bg-orange-600 hover:bg-orange-500 text-white px-4 py-2 rounded-lg text-sm font-medium">Logout</a>
-                <?php else: ?>
-                    <a href="<?php echo APP_URL; ?>/user/login.php" class="text-blue-100 hover:text-white text-sm font-medium">Login</a>
-                    <a href="<?php echo APP_URL; ?>/user/register.php" class="bg-orange-600 hover:bg-orange-500 text-white px-4 py-2 rounded-lg text-sm font-medium">Register</a>
-                <?php endif; ?>
-            </div>
+<body class="bg-[#F8F9FA] min-h-screen flex flex-col">
+
+<!-- Top Bar -->
+<div class="bg-white border-b border-gray-100 py-2 hidden md:block">
+    <div class="max-w-7xl mx-auto px-4 flex justify-between items-center text-[11px] text-gray-500 uppercase tracking-wider">
+        <div class="flex gap-4">
+            <span>📞 +079-23267521/570</span>
+            <span>📧 info@gtu.ac.in</span>
+        </div>
+        <div class="flex gap-4">
+            <a href="#" class="hover:text-gtublue">IQAC</a>
+            <a href="#" class="hover:text-gtublue">NIRF</a>
+            <a href="#" class="hover:text-gtublue">Screen Reader</a>
         </div>
     </div>
-</nav>
+</div>
+
+<!-- Header -->
+<header class="bg-white shadow-sm sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+        <a href="<?php echo APP_URL; ?>" class="flex items-center gap-3">
+            <img src="https://www.gtu.ac.in/img/logo.png" alt="GTU Logo" class="h-12 md:h-16">
+            <div class="hidden sm:block">
+                <h1 class="text-gtublue font-bold text-lg md:text-xl leading-tight">GUJARAT TECHNOLOGICAL UNIVERSITY</h1>
+                <p class="text-[10px] md:text-xs text-gtured font-semibold tracking-widest">INTERNATIONAL INNOVATIVE UNIVERSITY</p>
+            </div>
+        </a>
+        
+        <div class="flex items-center gap-2 md:gap-6">
+            <nav class="hidden lg:flex items-center gap-6 text-sm font-semibold text-gray-700">
+                <a href="<?php echo APP_URL; ?>" class="hover:text-gtublue border-b-2 border-transparent hover:border-gtublue py-1">Circulars</a>
+                <a href="#" class="hover:text-gtublue border-b-2 border-transparent hover:border-gtublue py-1">About Us</a>
+                <a href="#" class="hover:text-gtublue border-b-2 border-transparent hover:border-gtublue py-1">Contact</a>
+            </nav>
+        </div>
+    </div>
+</header>
+
 <?php if ($flash): ?>
 <div class="max-w-7xl mx-auto px-4 pt-4">
-    <div class="<?php echo $flash['type'] === 'success' ? 'bg-green-100 border border-green-400 text-green-700' : 'bg-red-100 border border-red-400 text-red-700'; ?> px-4 py-3 rounded-lg" role="alert">
+    <div class="<?php echo $flash['type'] === 'success' ? 'bg-green-50 border border-green-200 text-green-700' : 'bg-red-50 border border-red-200 text-red-700'; ?> px-4 py-3 rounded text-sm font-medium" role="alert">
         <?php echo htmlspecialchars($flash['message']); ?>
     </div>
 </div>

@@ -1,31 +1,35 @@
 <?php
 require_once __DIR__ . '/config/auth.php';
 require_once __DIR__ . '/config/database.php';
-$pageTitle = 'GTU Circulars';
+$pageTitle = 'Circulars';
 
-$type   = filter_input(INPUT_GET, 'type',   FILTER_SANITIZE_SPECIAL_CHARS) ?? '';
-$search = filter_input(INPUT_GET, 'search', FILTER_SANITIZE_SPECIAL_CHARS) ?? '';
-$page   = max(1, (int)(filter_input(INPUT_GET, 'page', FILTER_VALIDATE_INT) ?: 1));
-$limit  = 9;
-$offset = ($page - 1) * $limit;
-
-$typeBadges = [
-    'academic'    => 'bg-blue-100 text-blue-800',
-    'examination' => 'bg-red-100 text-red-800',
-    'events'      => 'bg-green-100 text-green-800',
-    'placement'   => 'bg-purple-100 text-purple-800',
-    'timetable'   => 'bg-yellow-100 text-yellow-800',
-    'general'     => 'bg-gray-100 text-gray-800',
-];
+$selYear  = filter_input(INPUT_GET, 'year',  FILTER_VALIDATE_INT);
+$selMonth = filter_input(INPUT_GET, 'month', FILTER_VALIDATE_INT);
+$search   = filter_input(INPUT_GET, 'search', FILTER_SANITIZE_SPECIAL_CHARS) ?? '';
+$page     = max(1, (int)(filter_input(INPUT_GET, 'page', FILTER_VALIDATE_INT) ?: 1));
+$limit    = 15;
+$offset   = ($page - 1) * $limit;
 
 try {
     $pdo    = db();
+    
+    // Fetch available years for filter
+    $years = $pdo->query("SELECT DISTINCT YEAR(created_at) as yr FROM circulars WHERE is_active = 1 ORDER BY yr DESC")->fetchAll(PDO::FETCH_COLUMN);
+    $months = [
+        1 => 'January', 2 => 'February', 3 => 'March', 4 => 'April', 5 => 'May', 6 => 'June',
+        7 => 'July', 8 => 'August', 9 => 'September', 10 => 'October', 11 => 'November', 12 => 'December'
+    ];
+
     $where  = ['c.is_active = 1'];
     $params = [];
 
-    if ($type) {
-        $where[]         = 'c.circular_type = :type';
-        $params[':type'] = $type;
+    if ($selYear) {
+        $where[] = 'YEAR(c.created_at) = :year';
+        $params[':year'] = $selYear;
+    }
+    if ($selMonth) {
+        $where[] = 'MONTH(c.created_at) = :month';
+        $params[':month'] = $selMonth;
     }
     if ($search) {
         $where[]           = '(c.title LIKE :search OR c.description LIKE :search2)';
@@ -58,164 +62,155 @@ try {
 
 include __DIR__ . '/includes/header.php';
 ?>
-<main class="flex-1">
 
-<!-- Hero -->
-<section class="bg-gradient-to-r from-blue-800 to-blue-900 text-white py-16">
-    <div class="max-w-7xl mx-auto px-4 text-center">
-        <h1 class="text-4xl md:text-5xl font-bold mb-4">
-            GTU <span class="text-orange-400">Circulars</span>
-        </h1>
-        <p class="text-blue-200 text-lg mb-8">
-            Stay updated with the latest notices from Gujarat Technological University
-        </p>
-        <form method="GET" class="max-w-2xl mx-auto flex flex-col sm:flex-row gap-2">
-            <input type="text" name="search" value="<?php echo htmlspecialchars($search); ?>"
-                   placeholder="Search circulars..."
-                   class="flex-1 px-4 py-3 rounded-xl text-gray-800 focus:outline-none focus:ring-2 focus:ring-orange-400">
-            <select name="type" class="px-4 py-3 rounded-xl text-gray-800 focus:outline-none focus:ring-2 focus:ring-orange-400">
-                <option value="">All Types</option>
-                <?php foreach (array_keys($typeBadges) as $t): ?>
-                    <option value="<?php echo $t; ?>" <?php echo $type === $t ? 'selected' : ''; ?>>
-                        <?php echo ucfirst($t); ?>
-                    </option>
-                <?php endforeach; ?>
-            </select>
-            <button type="submit" class="bg-orange-600 hover:bg-orange-500 px-6 py-3 rounded-xl font-semibold transition-colors">
-                Search
-            </button>
-        </form>
+<!-- GTU Style Banner -->
+<div class="bg-gtublue text-white py-8 md:py-12 border-t-4 border-gtured">
+    <div class="max-w-7xl mx-auto px-4">
+        <h1 class="text-3xl md:text-5xl font-light tracking-wide text-center lg:text-left">Circulars</h1>
     </div>
-</section>
+</div>
 
-<!-- Filter Pills -->
-<section class="bg-white border-b shadow-sm">
-    <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap gap-2">
-        <a href="<?php echo APP_URL; ?>?search=<?php echo urlencode($search); ?>"
-           class="px-4 py-1.5 rounded-full text-sm font-medium transition-colors <?php echo !$type ? 'bg-blue-800 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'; ?>">
-            All
-        </a>
-        <?php foreach ($typeBadges as $t => $cls): ?>
-            <a href="<?php echo APP_URL; ?>?type=<?php echo $t; ?>&search=<?php echo urlencode($search); ?>"
-               class="px-4 py-1.5 rounded-full text-sm font-medium transition-colors <?php echo $type === $t ? 'bg-blue-800 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'; ?>">
-                <?php echo ucfirst($t); ?>
-            </a>
-        <?php endforeach; ?>
-    </div>
-</section>
+<main class="max-w-7xl mx-auto px-4 py-10 flex-1">
+    <div class="flex flex-col lg:flex-row gap-10">
+        
+        <!-- Sidebar (GTU Style) -->
+        <aside class="lg:col-span-1">
+            <div class="bg-[#EBF3FE] rounded-lg p-6 space-y-8 sticky top-24">
+                
+                <!-- Student Portal -->
+                <section>
+                    <h2 class="text-[#1D2951] font-bold text-xl mb-4">Student Portal</h2>
+                    <a href="<?php echo APP_URL; ?>/user/login.php" class="inline-block bg-[#D32F2F] text-white px-8 py-2.5 rounded-full font-bold text-sm shadow-md hover:bg-red-700 transition-colors uppercase tracking-wider">
+                        LOGIN NOW
+                    </a>
+                    <div class="mt-4 border-b-4 border-[#1D2951] w-full"></div>
+                </section>
 
-<!-- Circulars Grid -->
-<section class="max-w-7xl mx-auto px-4 py-10">
-    <?php if ($dbError): ?>
-        <div class="bg-yellow-50 border border-yellow-300 text-yellow-800 p-4 rounded-xl mb-6 flex items-center gap-3">
-            <span class="text-2xl">⚠️</span>
-            <div>
-                <strong>Database not connected.</strong>
-                Please import <code>database.sql</code> and configure <code>/config/config.php</code>.
-            </div>
-        </div>
-    <?php endif; ?>
-
-    <div class="flex items-center justify-between mb-6">
-        <h2 class="text-2xl font-bold text-gray-800">
-            <?php echo $type ? ucfirst($type) . ' Circulars' : 'All Circulars'; ?>
-            <span class="text-sm font-normal text-gray-500 ml-2">(<?php echo $total; ?> found)</span>
-        </h2>
-        <a href="https://www.gtu.ac.in" target="_blank" rel="noopener"
-           class="flex items-center text-blue-600 hover:text-blue-800 text-sm font-medium">
-            Visit GTU Website &rarr;
-        </a>
-    </div>
-
-    <?php if (empty($circulars)): ?>
-        <div class="text-center py-20 bg-white rounded-xl shadow-sm border border-gray-100">
-            <div class="text-6xl mb-4">📋</div>
-            <p class="text-gray-500 text-lg mb-2">No circulars found.</p>
-            <?php if ($search || $type): ?>
-                <a href="<?php echo APP_URL; ?>" class="mt-2 inline-block text-blue-600 hover:underline text-sm">
-                    ← Clear filters
-                </a>
-            <?php endif; ?>
-        </div>
-    <?php else: ?>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <?php foreach ($circulars as $c): ?>
-                <div class="bg-white rounded-xl shadow-md hover:shadow-xl transition-shadow duration-200 overflow-hidden border border-gray-100 flex flex-col">
-                    <div class="p-6 flex-1 flex flex-col">
-                        <div class="flex items-center justify-between mb-3">
-                            <span class="px-3 py-1 rounded-full text-xs font-semibold <?php echo $typeBadges[$c['circular_type']] ?? 'bg-gray-100 text-gray-800'; ?>">
-                                <?php echo ucfirst($c['circular_type']); ?>
-                            </span>
-                            <span class="text-gray-400 text-xs">
-                                <?php echo date('M d, Y', strtotime($c['created_at'])); ?>
-                            </span>
+                <!-- News Corner -->
+                <section>
+                    <h2 class="text-[#1D2951] font-bold text-xl mb-1">News Corner</h2>
+                    <p class="text-[#555] text-[15px] mb-4 leading-tight">Exam Schedule, Guidelines & Circulars</p>
+                    <div class="mt-2 border-b-4 border-[#1D2951] w-full mb-6"></div>
+                    
+                    <div class="space-y-4">
+                        <?php 
+                        // Show top 2 recent circulars as 'News'
+                        $newsItems = array_slice($circulars, 0, 2);
+                        foreach ($newsItems as $item): 
+                        ?>
+                        <div class="bg-white p-4 rounded shadow-sm border border-blue-50">
+                            <span class="text-[11px] text-gray-400 font-bold block mb-1"><?php echo date('d-M-Y', strtotime($item['created_at'])); ?></span>
+                            <a href="<?php echo !empty($item['pdf_path']) ? htmlspecialchars(UPLOAD_URL . basename($item['pdf_path'])) : '#'; ?>" 
+                               target="_blank" class="text-blue-800 hover:text-gtured text-xs font-semibold leading-relaxed block">
+                                <?php echo htmlspecialchars($item['title']); ?>
+                            </a>
                         </div>
-                        <h3 class="text-gray-900 font-semibold text-base mb-2 line-clamp-2 flex-1">
-                            <?php echo htmlspecialchars($c['title']); ?>
-                        </h3>
-                        <p class="text-gray-500 text-sm mb-4 line-clamp-3">
-                            <?php echo htmlspecialchars($c['description'] ?? ''); ?>
-                        </p>
-                        <div class="flex items-center justify-between pt-2 border-t border-gray-50">
-                            <?php if (!empty($c['pdf_path'])): ?>
-                                <a href="<?php echo htmlspecialchars(UPLOAD_URL . basename($c['pdf_path'])); ?>"
-                                   class="flex items-center gap-1 text-orange-600 hover:text-orange-500 text-sm font-medium"
-                                   target="_blank" rel="noopener">
-                                    📥 Download PDF
-                                </a>
-                            <?php else: ?>
-                                <span class="text-gray-300 text-sm">No PDF attached</span>
-                            <?php endif; ?>
-                            <span class="text-gray-400 text-xs capitalize"><?php echo htmlspecialchars($c['source']); ?></span>
-                        </div>
+                        <?php endforeach; ?>
                     </div>
+                    
+                    <a href="#" class="inline-block mt-4 text-[#D32F2F] text-xs font-bold hover:underline uppercase tracking-widest">VIEW ALL</a>
+                </section>
+
+                <!-- New Horizons -->
+                <section>
+                    <h2 class="text-[#1D2951] font-bold text-xl mb-2">New Horizons</h2>
+                    <div class="flex gap-2 mb-4">
+                        <span class="text-gtured">▲</span>
+                        <span class="text-gtured">▼</span>
+                    </div>
+                    <div class="mt-2 border-b-4 border-[#1D2951] w-full mb-4"></div>
+                    <a href="#" class="inline-block text-[#D32F2F] text-xs font-bold hover:underline uppercase tracking-widest">VIEW ALL</a>
+                </section>
+            </div>
+        </aside>
+
+        <!-- Circular List -->
+        <div class="w-full lg:w-3/4">
+            
+            <?php if ($dbError): ?>
+                <div class="bg-red-50 border-l-4 border-red-500 p-4 mb-6">
+                    <p class="text-red-700 text-sm font-medium">Database connection failed. Please ensure MySQL is running and configured.</p>
                 </div>
-            <?php endforeach; ?>
-        </div>
-
-        <!-- Pagination -->
-        <?php if ($totalPages > 1): ?>
-        <div class="flex justify-center mt-10 gap-2 flex-wrap">
-            <?php if ($page > 1): ?>
-                <a href="?page=<?php echo $page - 1; ?>&type=<?php echo urlencode($type); ?>&search=<?php echo urlencode($search); ?>"
-                   class="px-4 py-2 rounded-lg text-sm font-medium bg-white text-gray-700 hover:bg-blue-50 border border-gray-200">
-                    &laquo; Prev
-                </a>
             <?php endif; ?>
-            <?php for ($p = max(1, $page - 2); $p <= min($totalPages, $page + 2); $p++): ?>
-                <a href="?page=<?php echo $p; ?>&type=<?php echo urlencode($type); ?>&search=<?php echo urlencode($search); ?>"
-                   class="px-4 py-2 rounded-lg text-sm font-medium <?php echo $p === $page ? 'bg-blue-800 text-white' : 'bg-white text-gray-700 hover:bg-blue-50 border border-gray-200'; ?>">
-                    <?php echo $p; ?>
-                </a>
-            <?php endfor; ?>
-            <?php if ($page < $totalPages): ?>
-                <a href="?page=<?php echo $page + 1; ?>&type=<?php echo urlencode($type); ?>&search=<?php echo urlencode($search); ?>"
-                   class="px-4 py-2 rounded-lg text-sm font-medium bg-white text-gray-700 hover:bg-blue-50 border border-gray-200">
-                    Next &raquo;
-                </a>
-            <?php endif; ?>
-        </div>
-        <?php endif; ?>
-    <?php endif; ?>
-</section>
 
-<!-- CTA -->
-<section class="bg-gradient-to-r from-orange-500 to-orange-600 text-white py-12">
-    <div class="max-w-3xl mx-auto px-4 text-center">
-        <h2 class="text-2xl md:text-3xl font-bold mb-3">Never Miss a Circular</h2>
-        <p class="text-orange-100 mb-6">Register now to get personalized email alerts for GTU circulars relevant to your degree and department.</p>
-        <div class="flex flex-col sm:flex-row gap-3 justify-center">
-            <a href="<?php echo APP_URL; ?>/user/register.php"
-               class="bg-white text-orange-600 hover:bg-orange-50 px-8 py-3 rounded-xl font-semibold transition-colors">
-                Create Free Account
-            </a>
-            <a href="<?php echo APP_URL; ?>/user/login.php"
-               class="border-2 border-white text-white hover:bg-orange-700 px-8 py-3 rounded-xl font-semibold transition-colors">
-                Sign In
-            </a>
+            <!-- Year/Month Filters Only -->
+            <div class="bg-white p-5 rounded border border-gray-200 shadow-sm mb-8">
+                <form method="GET" class="flex flex-col md:flex-row gap-4 items-center">
+                    <select name="year" class="w-full md:w-1/3 px-3 py-2.5 border border-gray-300 rounded text-sm text-gtured font-medium outline-none focus:border-gtublue">
+                        <option value="">-- Select Year --</option>
+                        <?php foreach ($years as $yr): ?>
+                            <option value="<?php echo $yr; ?>" <?php echo $selYear == $yr ? 'selected' : ''; ?>>
+                                <?php echo $yr; ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                    <select name="month" class="w-full md:w-1/3 px-3 py-2.5 border border-gray-300 rounded text-sm text-gtured font-medium outline-none focus:border-gtublue">
+                        <option value="">-- Select Month --</option>
+                        <?php foreach ($months as $num => $name): ?>
+                            <option value="<?php echo $num; ?>" <?php echo $selMonth == $num ? 'selected' : ''; ?>>
+                                <?php echo $name; ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                    <button type="submit" class="w-full md:w-1/3 bg-gtured text-white px-8 py-2.5 rounded font-bold hover:bg-red-700 transition-colors shadow-sm">
+                        FILTER
+                    </button>
+                </form>
+            </div>
+
+            <!-- Clean List (GTU Style) -->
+            <div class="bg-white rounded border border-gray-200 shadow-sm overflow-hidden">
+                <div class="divide-y divide-gray-100">
+                    <?php if (empty($circulars)): ?>
+                        <div class="p-20 text-center text-gray-400 italic">No matching circulars found.</div>
+                    <?php else: ?>
+                        <?php foreach ($circulars as $c): ?>
+                            <div class="p-5 hover:bg-gray-50 transition-colors border-l-4 border-transparent hover:border-gtured">
+                                <a href="<?php echo !empty($c['pdf_path']) ? htmlspecialchars(UPLOAD_URL . basename($c['pdf_path'])) : '#'; ?>" 
+                                   target="_blank" rel="noopener"
+                                   class="text-[#0056b3] hover:underline font-normal text-[15px] md:text-base block mb-1 leading-normal">
+                                    <?php echo htmlspecialchars($c['description'] ?: $c['title']); ?>
+                                </a>
+                                <div class="text-[13px] text-gray-500">
+                                    <?php echo date('d-M-Y', strtotime($c['created_at'])); ?>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </div>
+            </div>
+
+            <!-- Pagination -->
+            <?php if ($totalPages > 1): ?>
+                <div class="mt-10 flex justify-center gap-2">
+                    <?php 
+                    $queryStr = http_build_query([
+                        'year'   => $selYear,
+                        'month'  => $selMonth,
+                        'search' => $search
+                    ]);
+                    ?>
+                    <?php if ($page > 1): ?>
+                        <a href="?page=<?php echo $page-1; ?>&<?php echo $queryStr; ?>" class="px-4 py-2 border border-gray-300 rounded text-xs font-bold text-gray-600 hover:bg-gray-100 transition-colors">&laquo; PREV</a>
+                    <?php endif; ?>
+                    
+                    <div class="flex gap-1">
+                        <?php for ($p = max(1, $page-2); $p <= min($totalPages, $page+2); $p++): ?>
+                            <a href="?page=<?php echo $p; ?>&<?php echo $queryStr; ?>" 
+                               class="w-10 h-10 flex items-center justify-center border <?php echo $p === $page ? 'bg-gtublue text-white border-gtublue' : 'border-gray-200 text-gray-600 hover:bg-gray-100'; ?> rounded text-xs font-bold transition-all">
+                                <?php echo $p; ?>
+                            </a>
+                        <?php endfor; ?>
+                    </div>
+
+                    <?php if ($page < $totalPages): ?>
+                        <a href="?page=<?php echo $page+1; ?>&<?php echo $queryStr; ?>" class="px-4 py-2 border border-gray-300 rounded text-xs font-bold text-gray-600 hover:bg-gray-100 transition-colors">NEXT &raquo;</a>
+                    <?php endif; ?>
+                </div>
+            <?php endif; ?>
+
         </div>
     </div>
-</section>
-
 </main>
+
 <?php include __DIR__ . '/includes/footer.php'; ?>
